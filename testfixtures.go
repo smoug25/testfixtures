@@ -203,7 +203,7 @@ func (f *fixtureFile) fileNameWithoutExtension() string {
 }
 
 func (f *fixtureFile) delete(tx *sql.Tx, h Helper) error {
-	_, err := tx.Exec(fmt.Sprintf("DELETE FROM %s", h.quoteKeyword(f.fileNameWithoutExtension())))
+	_, err := tx.Exec(fmt.Sprintf("TRUNCATE TABLE %s", h.quoteKeyword(f.fileNameWithoutExtension())))
 	return err
 }
 

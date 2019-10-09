@@ -2,34 +2,36 @@ package testfixtures
 
 import (
 	"database/sql"
-	"path/filepath"
+	"errors"
 )
 
 // Clickhouse is the Clickhouse Helper for this package
 type Clickhouse struct {
+	dbName string
 	baseHelper
+}
+
+func NewClickhouseHelper(dbName string) *Clickhouse {
+	return &Clickhouse{dbName: dbName}
 }
 
 func (*Clickhouse) paramType() int {
 	return paramTypeQuestion
 }
 
-func (*Clickhouse) databaseName(q queryable) (string, error) {
-	var seq int
-	var main, dbName string
-	err := q.QueryRow("PRAGMA database_list").Scan(&seq, &main, &dbName)
-	if err != nil {
-		return "", err
+func (c *Clickhouse) databaseName(q queryable) (string, error) {
+	if len(c.dbName) <=0 {
+		return "", errors.New("Empty db name")
 	}
-	dbName = filepath.Base(dbName)
-	return dbName, nil
+	return c.dbName, nil
 }
 
-func (*Clickhouse) tableNames(q queryable) ([]string, error) {
+func (c *Clickhouse) tableNames(q queryable) ([]string, error) {
 	query := `
-		SELECT name
-		FROM Clickhouse_master
-		WHERE type = 'table';
+		select name 
+                from system.tables 
+                where engine = 'ReplacingMergeTree' 
+                and database = '` + c.dbName +`'
 	`
 	rows, err := q.Query(query)
 	if err != nil {
@@ -52,15 +54,15 @@ func (*Clickhouse) tableNames(q queryable) ([]string, error) {
 }
 
 func (*Clickhouse) disableReferentialIntegrity(db *sql.DB, loadFn loadFunction) (err error) {
-	defer func() {
-		if _, err2 := db.Exec("PRAGMA defer_foreign_keys = OFF"); err2 != nil && err == nil {
-			err = err2
-		}
-	}()
-
-	if _, err = db.Exec("PRAGMA defer_foreign_keys = ON"); err != nil {
-		return err
-	}
+	//defer func() {
+	//	if _, err2 := db.Exec("PRAGMA defer_foreign_keys = OFF"); err2 != nil && err == nil {
+	//		err = err2
+	//	}
+	//}()
+	//
+	//if _, err = db.Exec("PRAGMA defer_foreign_keys = ON"); err != nil {
+	//	return err
+	//}
 
 	tx, err := db.Begin()
 	if err != nil {
