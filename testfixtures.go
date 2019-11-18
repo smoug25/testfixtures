@@ -204,7 +204,13 @@ func (f *fixtureFile) fileNameWithoutExtension() string {
 
 func (f *fixtureFile) delete(tx *sql.Tx, h Helper) error {
 	_, err := tx.Exec(fmt.Sprintf("TRUNCATE TABLE %s", h.quoteKeyword(f.fileNameWithoutExtension())))
-	return err
+	if err != nil {
+            _, err := tx.Exec(fmt.Sprintf("DELETE * TABLE %s", h.quoteKeyword(f.fileNameWithoutExtension())))
+            if err == nil {
+                retutn nil
+            }
+        }
+        return err
 }
 
 func (f *fixtureFile) buildInsertSQL(h Helper, record map[interface{}]interface{}) (sqlStr string, values []interface{}, err error) {
