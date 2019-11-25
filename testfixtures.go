@@ -203,13 +203,12 @@ func (f *fixtureFile) fileNameWithoutExtension() string {
 }
 
 func (f *fixtureFile) delete(tx *sql.Tx, h Helper) error {
-	_, err := tx.Exec(fmt.Sprintf("TRUNCATE TABLE %s", h.quoteKeyword(f.fileNameWithoutExtension())))
-	if err != nil {
-            _, err := tx.Exec(fmt.Sprintf("DELETE * TABLE %s", h.quoteKeyword(f.fileNameWithoutExtension())))
-            if err == nil {
-                return nil
-            }
-        }
+        var err error        
+        if h , ok := h.(*PostgreSQL); ok {
+                _, err = tx.Exec(fmt.Sprintf("TRUNCATE TABLE %s CASCADE", h.quoteKeyword(f.fileNameWithoutExtension())))
+	} else {
+		_, err = tx.Exec(fmt.Sprintf("TRUNCATE TABLE %s", h.quoteKeyword(f.fileNameWithoutExtension())))
+	}	
         return err
 }
 
