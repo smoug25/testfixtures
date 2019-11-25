@@ -207,7 +207,7 @@ func (f *fixtureFile) delete(tx *sql.Tx, h Helper) error {
 	if err != nil {
             _, err := tx.Exec(fmt.Sprintf("DELETE * TABLE %s", h.quoteKeyword(f.fileNameWithoutExtension())))
             if err == nil {
-                retutn nil
+                return nil
             }
         }
         return err
