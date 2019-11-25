@@ -1,4 +1,4 @@
-module gopkg.in/testfixtures.v2
+module github.com/smoug25/testfixtures
 
 require (
 	cloud.google.com/go v0.33.1 // indirect
