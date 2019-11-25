@@ -1,3 +1,3 @@
-module github.com/smoug25/testfixture/v2
+module github.com/smoug25/testfixtures/v2
 
 go 1.13
